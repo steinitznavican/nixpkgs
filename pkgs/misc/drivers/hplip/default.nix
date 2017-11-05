@@ -11,11 +11,11 @@
 let
 
   name = "hplip-${version}";
-  version = "3.17.9";
+  version = "3.17.10";
 
   src = fetchurl {
     url = "mirror://sourceforge/hplip/${name}.tar.gz";
-    sha256 = "0y46jjq8jdfk9m4vjq55h8yggibvqbi9rl08vni7vbhxym1diamj";
+    sha256 = "0v27hg856b5z2rilczcbfgz8ksxn0n810g1glac3mxkj8qbl8wqg";
   };
 
   plugin = fetchurl {
