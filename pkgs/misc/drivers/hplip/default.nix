@@ -19,8 +19,8 @@ let
   };
 
   plugin = fetchurl {
-    url = "http://hplipopensource.com/hplip-web/plugin/${name}-plugin.run";
-    sha256 = "10z8vzwcwmwni7s4j9xp0fa7l4lwrhl4kp450dga3fj0cck1gxwq";
+    url = "http://www.openprinting.org/download/printdriver/auxfiles/HP/plugins/${name}-plugin.run";
+    sha256 = "07am3dnl0ipgfswz5wndprryljh9rqbfhq7mm4d4yyj3bdnnzlig";
   };
 
   hplipState = substituteAll {
