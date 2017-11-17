@@ -16,7 +16,7 @@
 stdenv.mkDerivation rec {
   name = "${basename}-${version}";
   basename = "light-locker";
-  version = "1.7.0";
+  version = "1.8.0";
 
   src = fetchFromGitHub {
     owner = "the-cavalry";
@@ -24,9 +24,6 @@ stdenv.mkDerivation rec {
     rev = "v${version}";
     sha256 = "0ygkp5vgkx2nfhfql6j2jsfay394gda23ir3sx4f72j4agsirjvj";
   };
-
-  # Patch so that systemd is "found" when configuring.
-  patches = [ ./systemd.patch ];
 
   nativeBuildInputs = [ pkgconfig ];
   buildInputs = [ which xfce.xfce4_dev_tools glib systemd
