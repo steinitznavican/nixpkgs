@@ -18,13 +18,7 @@ stdenv.mkDerivation rec {
 
   nativeBuildInputs = [ intltool pkgconfig ];
 
-  postPatch = ''
-    sed -i -e 's%"\(/usr/sbin\|/usr/pkg/sbin\|/usr/local/sbin\)/[^"]*",%%g' ./src/nm-pptp-service.c
-
-    substituteInPlace ./src/nm-pptp-service.c \
-      --replace /sbin/pptp ${pptp}/bin/pptp \
-      --replace /sbin/pppd ${ppp}/bin/pppd
-  '';
+  patches = [ ./nm-pptp-service-remove-manual-path-calculations-use-.patch ];
 
   configureFlags =
     if withGnome then "--with-gnome --with-gtkver=3" else "--without-gnome";

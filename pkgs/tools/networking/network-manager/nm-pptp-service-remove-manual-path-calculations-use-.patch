@@ -1,0 +1,160 @@
+From 4a9b8648657b14382f69efd4ba70241e2d4b14f3 Mon Sep 17 00:00:00 2001
+From: Florian Klink <flokli@flokli.de>
+Date: Sun, 19 Nov 2017 00:46:09 +0100
+Subject: [PATCH] nm-pptp-service: remove manual path calculations, use
+ G_SPAWN_SEARCH_PATH
+
+---
+ src/nm-pptp-service.c | 87 +++++++++------------------------------------------
+ 1 file changed, 14 insertions(+), 73 deletions(-)
+
+diff --git a/src/nm-pptp-service.c b/src/nm-pptp-service.c
+index 1710fd9..9da52cc 100644
+--- a/src/nm-pptp-service.c
++++ b/src/nm-pptp-service.c
+@@ -341,50 +341,6 @@ pppd_watch_cb (GPid pid, gint status, gpointer user_data)
+ 	}
+ }
+ 
+-static inline const char *
+-nm_find_pppd (void)
+-{
+-	static const char *pppd_binary_paths[] =
+-		{
+-			"/sbin/pppd",
+-			"/usr/sbin/pppd",
+-			"/usr/local/sbin/pppd",
+-			NULL
+-		};
+-
+-	const char  **pppd_binary = pppd_binary_paths;
+-
+-	while (*pppd_binary != NULL) {
+-		if (g_file_test (*pppd_binary, G_FILE_TEST_EXISTS))
+-			break;
+-		pppd_binary++;
+-	}
+-
+-	return *pppd_binary;
+-}
+-
+-static inline const char *
+-nm_find_pptp (void)
+-{
+-	static const char *pptp_binary_paths[] =
+-		{
+-			"/sbin/pptp",
+-			"/usr/sbin/pptp",
+-			"/usr/local/sbin/pptp",
+-			NULL
+-		};
+-
+-	const char  **pptp_binary = pptp_binary_paths;
+-
+-	while (*pptp_binary != NULL) {
+-		if (g_file_test (*pptp_binary, G_FILE_TEST_EXISTS))
+-			break;
+-		pptp_binary++;
+-	}
+-
+-	return *pptp_binary;
+-}
+-
+ static gboolean
+ pppd_timed_out (gpointer user_data)
+ {
+@@ -429,27 +385,16 @@ str_to_int (const char *str, long int *out)
+ static GPtrArray *
+ construct_pppd_args (NMPptpPlugin *plugin,
+                      NMSettingVpn *s_vpn,
+-                     const char *pppd,
+                      const char *gwaddr,
+                      GError **error)
+ {
+ 	GPtrArray *args = NULL;
+-	const char *value, *pptp_binary;
++	const char *value;
+ 	char *ipparam, *tmp;
+ 	char log_level;
+ 
+-	pptp_binary = nm_find_pptp ();
+-	if (!pptp_binary) {
+-		g_set_error (error,
+-		             NM_VPN_PLUGIN_ERROR,
+-		             NM_VPN_PLUGIN_ERROR_LAUNCH_FAILED,
+-		             "%s",
+-		             _("Could not find pptp client binary."));
+-		return FALSE;
+-	}
+-
+ 	args = g_ptr_array_new ();
+-	g_ptr_array_add (args, (gpointer) g_strdup (pppd));
++	g_ptr_array_add (args, (gpointer) g_strdup ("pppd"));
+ 
+ 	/* PPTP options */
+ 	if (!gwaddr || !strlen (gwaddr)) {
+@@ -472,7 +417,7 @@ construct_pppd_args (NMPptpPlugin *plugin,
+ 
+ 	g_ptr_array_add (args, (gpointer) g_strdup ("pty"));
+ 	tmp = g_strdup_printf ("%s %s --nolaunchpppd --loglevel %c --logstring %s",
+-	                       pptp_binary, gwaddr,
++	                       "pptp", gwaddr,
+ 	                       log_level,
+ 	                       ipparam);
+ 	g_ptr_array_add (args, (gpointer) tmp);
+@@ -617,25 +562,20 @@ nm_pptp_start_pppd_binary (NMPptpPlugin *plugin,
+ {
+ 	NMPptpPluginPrivate *priv = NM_PPTP_PLUGIN_GET_PRIVATE (plugin);
+ 	GPid pid;
+-	const char *pppd_binary;
+ 	GPtrArray *pppd_argv;
+ 
+-	pppd_binary = nm_find_pppd ();
+-	if (!pppd_binary) {
+-		g_set_error (error,
+-		             NM_VPN_PLUGIN_ERROR,
+-		             NM_VPN_PLUGIN_ERROR_LAUNCH_FAILED,
+-		             "%s",
+-		             _("Could not find the pppd binary."));
+-		return FALSE;
+-	}
+-
+-	pppd_argv = construct_pppd_args (plugin, s_vpn, pppd_binary, priv->saddr, error);
++	pppd_argv = construct_pppd_args (plugin, s_vpn, priv->saddr, error);
+ 	if (!pppd_argv)
+ 		return FALSE;
+ 
+ 	if (!g_spawn_async (NULL, (char **) pppd_argv->pdata, NULL,
+-	                    G_SPAWN_DO_NOT_REAP_CHILD, NULL, NULL, &pid, error)) {
++	                    G_SPAWN_DO_NOT_REAP_CHILD | G_SPAWN_SEARCH_PATH,
++			    NULL, NULL, &pid, error)) {
++		g_set_error (error,
++		             NM_VPN_PLUGIN_ERROR,
++		             NM_VPN_PLUGIN_ERROR_LAUNCH_FAILED,
++			     _("starting pppd failed: %s"),
++			     (*error)->message);
+ 		g_ptr_array_free (pppd_argv, TRUE);
+ 		return FALSE;
+ 	}
+@@ -1113,7 +1053,7 @@ main (int argc, char *argv[])
+ 	GMainLoop *main_loop;
+ 	gboolean persist = FALSE;
+ 	GOptionContext *opt_ctx = NULL;
+-	char *conntrack_module[] = { "/sbin/modprobe", "nf_conntrack_pptp", NULL };
++	char *conntrack_module[] = { "modprobe", "nf_conntrack_pptp", NULL };
+ 	GError *error = NULL;
+ 	gs_free char *bus_name_free = NULL;
+ 	const char *bus_name;
+@@ -1183,7 +1123,8 @@ main (int argc, char *argv[])
+ 	 * might not exist (older kernels).
+ 	 * https://bugzilla.redhat.com/show_bug.cgi?id=1187328
+ 	 */
+-	if (!g_spawn_sync (NULL, conntrack_module, NULL, 0, NULL, NULL, NULL, NULL, NULL, &error)) {
++	if (!g_spawn_sync (NULL, conntrack_module, NULL, G_SPAWN_SEARCH_PATH,
++	                   NULL, NULL, NULL, NULL, NULL, &error)) {
+ 		_LOGW ("modprobing nf_conntrack_pptp failed: %s", error->message);
+ 		g_error_free (error);
+ 	}
+-- 
+2.15.0
+
