@@ -1,0 +1,66 @@
+From 66ee116548713a8b5aea55ac5ac05a970353ca9f Mon Sep 17 00:00:00 2001
+From: Florian Klink <flokli@flokli.de>
+Date: Sun, 19 Nov 2017 22:46:58 +0100
+Subject: [PATCH] Makefile.am: use @*_LIBS@ instead of using -l* directly, overlink lonig
+
+---
+ common/db-wrapper/Makefile.am | 2 +-
+ fuse/Makefile.am              | 2 +-
+ lib/Makefile.am               | 4 ++--
+ server/Makefile.am            | 2 +-
+ 4 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/common/db-wrapper/Makefile.am b/common/db-wrapper/Makefile.am
+index 24dd035..065adca 100644
+--- a/common/db-wrapper/Makefile.am
++++ b/common/db-wrapper/Makefile.am
+@@ -20,4 +20,4 @@ endif
+ libdbwrapper_la_SOURCES = db-wrapper.c sqlite-db-ops.c $(MYSQL_DB_SRC) $(PGSQL_DB_SRC)
+ 
+ libdbwrapper_la_LDFLAGS = -Wl,-z -Wl,defs
+-libdbwrapper_la_LIBADD = @SSL_LIBS@ @GLIB2_LIBS@ @MYSQL_LIBS@ -lsqlite3 @PGSQL_LIBS@
++libdbwrapper_la_LIBADD = @SSL_LIBS@ @GLIB2_LIBS@ @MYSQL_LIBS@ @SQLITE3_LIBS@ @PGSQL_LIBS@
+diff --git a/fuse/Makefile.am b/fuse/Makefile.am
+index 096d67b..1e10556 100644
+--- a/fuse/Makefile.am
++++ b/fuse/Makefile.am
+@@ -37,7 +37,7 @@ seaf_fuse_SOURCES = seaf-fuse.c \
+ 
+ seaf_fuse_LDADD = @CCNET_LIBS@ \
+ 		  @GLIB2_LIBS@ @GOBJECT_LIBS@ @SSL_LIBS@ @LIB_RT@ @LIB_UUID@ \
+-                  -lsqlite3 @LIBEVENT_LIBS@ \
++                  @SQLITE3_LIBS@ @LIBEVENT_LIBS@ \
+ 		  $(top_builddir)/common/cdc/libcdc.la \
+ 		  $(top_builddir)/common/db-wrapper/libdbwrapper.la \
+ 		  @SEARPC_LIBS@ @JANSSON_LIBS@ @FUSE_LIBS@ @ZLIB_LIBS@ \
+diff --git a/lib/Makefile.am b/lib/Makefile.am
+index 88df2e9..3925418 100644
+--- a/lib/Makefile.am
++++ b/lib/Makefile.am
+@@ -43,8 +43,8 @@ noinst_LTLIBRARIES = libseafile_common.la
+ 
+ libseafile_common_la_SOURCES = ${seafile_object_gen} ${utils_srcs}
+ libseafile_common_la_LDFLAGS = -no-undefined
+-libseafile_common_la_LIBADD = @GLIB2_LIBS@  @GOBJECT_LIBS@ @SSL_LIBS@ -lcrypto @LIB_GDI32@ \
+-				     @LIB_UUID@ @LIB_WS32@ @LIB_PSAPI@ -lsqlite3 \
++libseafile_common_la_LIBADD = @GLIB2_LIBS@  @GOBJECT_LIBS@ @SSL_LIBS@ @CRYPTO_LIBS@ @LIB_GDI32@ \
++				     @LIB_UUID@ @LIB_WS32@ @LIB_PSAPI@ @SQLITE3_LIBS@ \
+ 					 @LIBEVENT_LIBS@ @SEARPC_LIBS@ @LIB_SHELL32@ \
+ 	@ZLIB_LIBS@
+ 
+diff --git a/server/Makefile.am b/server/Makefile.am
+index 2491f5e..5943b32 100644
+--- a/server/Makefile.am
++++ b/server/Makefile.am
+@@ -114,7 +114,7 @@ seaf_server_SOURCES = \
+ 
+ seaf_server_LDADD = @CCNET_LIBS@ \
+ 	$(top_builddir)/lib/libseafile_common.la \
+-	@GLIB2_LIBS@ @GOBJECT_LIBS@ @SSL_LIBS@ @LIB_RT@ @LIB_UUID@ -lsqlite3 @LIBEVENT_LIBS@ -levhtp \
++	-lonig @GLIB2_LIBS@ @GOBJECT_LIBS@ @SSL_LIBS@ @LIB_RT@ @LIB_UUID@ @SQLITE3_LIBS@ @LIBEVENT_LIBS@ @EVHTP_LIBS@ \
+ 	$(top_builddir)/common/cdc/libcdc.la \
+ 	$(top_builddir)/common/db-wrapper/libdbwrapper.la \
+ 	@SEARPC_LIBS@ @JANSSON_LIBS@ ${LIB_WS32} @ZLIB_LIBS@ \
+-- 
+2.15.0
+

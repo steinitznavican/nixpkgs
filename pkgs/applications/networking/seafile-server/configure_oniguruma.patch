@@ -1,0 +1,35 @@
+From b7c3a39ddbdf2c305867e174e357afe8a772d9d4 Mon Sep 17 00:00:00 2001
+From: Florian Klink <flokli@flokli.de>
+Date: Tue, 21 Nov 2017 01:07:16 +0100
+Subject: [PATCH 2/2] configure.ac: add oniguruma
+
+---
+ configure.ac | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/configure.ac b/configure.ac
+index b7ec9b2..b8e8203 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -181,6 +181,7 @@ AC_SUBST(LIB_ICONV)
+ 
+ LIBEVENT_REQUIRED=2.0
+ LIBEVHTP_REQUIRED=1.2.14
++LIBONIGURUMA_REQUIRED=6.6.0
+ GLIB_REQUIRED=2.16.0
+ CCNET_REQUIRED=0.9.3
+ SEARPC_REQUIRED=1.0
+@@ -223,6 +224,10 @@ PKG_CHECK_MODULES(LIBEVHTP, [evhtp >= $LIBEVHTP_REQUIRED])
+ AC_SUBST(LIBEVHTP_CFLAGS)
+ AC_SUBST(LIBEVHTP_LIBS)
+ 
++PKG_CHECK_MODULES(LIBONIGURUMA, [oniguruma >= $LIBONIGURUMA_REQUIRED])
++AC_SUBST(LIBONIGURUMA_CFLAGS)
++AC_SUBST(LIBONIGURUMA_LIBS)
++
+ PKG_CHECK_MODULES(ZLIB, [zlib >= $ZLIB_REQUIRED])
+ AC_SUBST(ZLIB_CFLAGS)
+ AC_SUBST(ZLIB_LIBS)
+-- 
+2.15.0
+

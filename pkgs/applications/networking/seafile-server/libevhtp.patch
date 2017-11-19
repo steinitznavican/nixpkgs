@@ -1,0 +1,35 @@
+From 0c5d4d85a88c0e4e5d615cd223029742f522e3fc Mon Sep 17 00:00:00 2001
+From: Florian Klink <flokli@flokli.de>
+Date: Tue, 21 Nov 2017 00:55:26 +0100
+Subject: [PATCH] configure.ac: add LIBEVHTP
+
+---
+ configure.ac | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/configure.ac b/configure.ac
+index f1ece57..7587416 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -180,6 +180,7 @@ AC_SUBST(LIB_ICONV)
+ 
+ 
+ LIBEVENT_REQUIRED=2.0
++LIBEVHTP_REQUIRED=1.2.14
+ GLIB_REQUIRED=2.16.0
+ CCNET_REQUIRED=0.9.3
+ SEARPC_REQUIRED=1.0
+@@ -218,6 +219,10 @@ PKG_CHECK_MODULES(LIBEVENT, [libevent >= $LIBEVENT_REQUIRED])
+ AC_SUBST(LIBEVENT_CFLAGS)
+ AC_SUBST(LIBEVENT_LIBS)
+ 
++PKG_CHECK_MODULES(LIBEVHTP, [evhtp >= $LIBEVHTP_REQUIRED])
++AC_SUBST(LIBEVHTP_CFLAGS)
++AC_SUBST(LIBEVHTP_LIBS)
++
+ PKG_CHECK_MODULES(ZLIB, [zlib >= $ZLIB_REQUIRED])
+ AC_SUBST(ZLIB_CFLAGS)
+ AC_SUBST(ZLIB_LIBS)
+-- 
+2.15.0
+

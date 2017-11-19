@@ -1,0 +1,32 @@
+From 6e529a0f2d4a680e540f3a2f666c79722fa4d228 Mon Sep 17 00:00:00 2001
+From: Florian Klink <flokli@flokli.de>
+Date: Sun, 19 Nov 2017 22:57:07 +0100
+Subject: [PATCH] configure.ac: add PKG_CHECK_MODULES calls for sqlite3, evhtp,
+ lzma, bz2
+
+---
+ configure.ac | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/configure.ac b/configure.ac
+index f1ece57..e0a3712 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -222,6 +222,14 @@ PKG_CHECK_MODULES(ZLIB, [zlib >= $ZLIB_REQUIRED])
+ AC_SUBST(ZLIB_CFLAGS)
+ AC_SUBST(ZLIB_LIBS)
+ 
++PKG_CHECK_MODULES(SQLITE3, [sqlite3])
++AC_SUBST(SQLITE3_CFLAGS)
++AC_SUBST(SQLITE3_LIBS)
++
++PKG_CHECK_MODULES(EVHTP, [evhtp])
++AC_SUBST(EVHTP_CFLAGS)
++AC_SUBST(EVHTP_LIBS)
++
+ if test x${compile_python} = xyes; then
+     AM_PATH_PYTHON([2.6])
+     if test "$bwin32" = true; then
+-- 
+2.15.0
+
