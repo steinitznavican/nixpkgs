@@ -9160,6 +9160,8 @@ with pkgs;
     fetchurl = fetchurlBoot;
   };
 
+  libevhtp = callPackage ../development/libraries/libevhtp { };
+
   libevent = callPackage ../development/libraries/libevent { };
 
   libewf = callPackage ../development/libraries/libewf { };
