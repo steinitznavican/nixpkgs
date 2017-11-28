@@ -1,0 +1,189 @@
+diff --git a/hwdb/meson.build b/hwdb/meson.build
+index a5175039c..482927289 100644
+--- a/hwdb/meson.build
++++ b/hwdb/meson.build
+@@ -26,7 +26,7 @@ if conf.get('ENABLE_HWDB') == 1
+                                  mkdir_p.format(join_paths(sysconfdir, 'udev/hwdb.d')))
+ 
+         meson.add_install_script('sh', '-c',
+-                                 'test -n "$DESTDIR" || @0@/systemd-hwdb update'
++                                 'test -n "@0@" || @0@/systemd-hwdb update'
+                                  .format(rootbindir))
+ endif
+ 
+diff --git a/man/meson.build b/man/meson.build
+index 7d28e6ba1..4f1ef1d12 100644
+--- a/man/meson.build
++++ b/man/meson.build
+@@ -71,7 +71,7 @@ foreach tuple : manpages
+                                 command : ['ln', '-fs', html, '@OUTPUT@'])
+                         if want_html
+                                 dst = join_paths(docdir, 'html', htmlalias)
+-                                cmd = 'ln -fs @0@ $DESTDIR@1@'.format(html, dst)
++                                cmd = 'ln -fs @0@ @1@'.format(html, dst)
+                                 meson.add_install_script('sh', '-c', cmd)
+                                 p2 += [link]
+                         endif
+@@ -145,7 +145,7 @@ foreach tuple : [['systemd.directives', '7', systemd_directives_xml],
+                         command : ['ln', '-fs', html, '@OUTPUT@'])
+                 if want_html
+                         dst = join_paths(docdir, 'html', htmlalias)
+-                        cmd = 'ln -fs @0@ $DESTDIR@1@'.format(html, dst)
++                        cmd = 'ln -fs @0@ @1@'.format(html, dst)
+                         meson.add_install_script('sh', '-c', cmd)
+                         p2 += [link]
+                 endif
+diff --git a/meson.build b/meson.build
+index f7a610af3..ab54c5b79 100644
+--- a/meson.build
++++ b/meson.build
+@@ -37,13 +37,6 @@ endif
+ 
+ #####################################################################
+ 
+-rootprefixdir = get_option('rootprefix')
+-conf.set10('HAVE_SPLIT_USR', get_option('split-usr'))
+-if get_option('split-usr')
+-        rootprefixdir = rootprefixdir != '' ? rootprefixdir : '/'
+-else
+-        rootprefixdir = rootprefixdir != '' ? rootprefixdir : '/usr'
+-endif
+ 
+ sysvinit_path = get_option('sysvinit-path')
+ sysvrcnd_path = get_option('sysvrcnd-path')
+@@ -66,6 +59,14 @@ includedir = join_paths(prefixdir, get_option('includedir'))
+ datadir = join_paths(prefixdir, get_option('datadir'))
+ localstatedir = join_paths('/', get_option('localstatedir'))
+ 
++rootprefixdir = get_option('rootprefix')
++conf.set10('HAVE_SPLIT_USR', get_option('split-usr'))
++if get_option('split-usr')
++        rootprefixdir = rootprefixdir != '' ? rootprefixdir : prefixdir
++else
++        rootprefixdir = rootprefixdir != '' ? rootprefixdir : join_paths(prefixdir, '/usr')
++endif
++
+ rootbindir = join_paths(rootprefixdir, 'bin')
+ rootlibexecdir = join_paths(rootprefixdir, 'lib/systemd')
+ 
+@@ -469,7 +470,7 @@ stat = find_program('stat')
+ git = find_program('git', required : false)
+ 
+ meson_make_symlink = meson.source_root() + '/tools/meson-make-symlink.sh'
+-mkdir_p = 'mkdir -p $DESTDIR/@0@'
++mkdir_p = 'mkdir -p @0@'
+ test_efi_create_disk_sh = find_program('test/test-efi-create-disk.sh')
+ splash_bmp = files('test/splash.bmp')
+ 
+@@ -535,7 +536,13 @@ conf.set('GPERF_LEN_TYPE', gperf_len_type,
+ 
+ ############################################################
+ 
+-if not cc.has_header('sys/capability.h')
++libcap = dependency('libcap', required : false)
++if not libcap.found()
++        # Compat with Ubuntu 14.04 which ships libcap w/o .pc file
++        libcap = cc.find_library('cap')
++endif
++
++if not cc.has_header('sys/capability.h', dependencies: libcap)
+         error('POSIX caps headers not found')
+ endif
+ foreach header : ['linux/btrfs.h',
+@@ -658,12 +665,6 @@ libm = cc.find_library('m')
+ libdl = cc.find_library('dl')
+ libcrypt = cc.find_library('crypt')
+ 
+-libcap = dependency('libcap', required : false)
+-if not libcap.found()
+-        # Compat with Ubuntu 14.04 which ships libcap w/o .pc file
+-        libcap = cc.find_library('cap')
+-endif
+-
+ libmount = dependency('mount',
+                       version : '>= 2.30')
+ 
+@@ -1249,7 +1250,7 @@ foreach tuple : [['myhostname', 'ENABLE_MYHOSTNAME'],
+                 # We cannot use shared_module because it does not support version suffix.
+                 # Unfortunately shared_library insists on creating the symlink…
+                 meson.add_install_script('sh', '-c',
+-                                         'rm $DESTDIR@0@/libnss_@1@.so'
++                                         'rm @0@/libnss_@1@.so'
+                                          .format(rootlibdir, module))
+ 
+                 test('dlopen-nss_' + module,
+@@ -2364,7 +2365,7 @@ install_data('README',
+              install_dir : docdir)
+ 
+ meson.add_install_script('sh', '-c', mkdir_p.format(systemdstatedir))
+-meson.add_install_script('sh', '-c', 'touch $DESTDIR@0@'.format(prefixdir))
++meson.add_install_script('sh', '-c', 'touch @0@'.format(prefixdir))
+ 
+ ############################################################
+ 
+diff --git a/shell.nix b/shell.nix
+new file mode 100644
+index 000000000..84ffe7200
+--- /dev/null
++++ b/shell.nix
+@@ -0,0 +1,10 @@
++with import <nixpkgs> {};
++
++stdenv.mkDerivation {
++  name = "env";
++  nativeBuildInputs = [ pkgconfig intltool gperf libxslt gettext docbook_xsl docbook_xml_dtd_42 docbook_xml_dtd_45
++  coreutils # meson calls date, state etc.
++  ninja meson
++  ];
++  buildInputs = [ linuxHeaders libcap kmod xz pam acl libuuid m4 glib libgcrypt libgpgerror libmicrohttpd kexectools libseccomp libffi audit lz4 libapparmor iptables gnu-efi ];
++}
+diff --git a/src/journal-remote/meson.build b/src/journal-remote/meson.build
+index ed963d793..fd6794743 100644
+--- a/src/journal-remote/meson.build
++++ b/src/journal-remote/meson.build
+@@ -41,9 +41,10 @@ if conf.get('ENABLE_REMOTE') == 1 and conf.get('HAVE_MICROHTTPD') == 1
+         install_data('browse.html',
+                      install_dir : join_paths(pkgdatadir, 'gatewayd'))
+ 
++        journal_remote_logdir = join_paths(prefixdir, '/var/log/journal/remote')
++
+         meson.add_install_script('sh', '-c',
+-                                 mkdir_p.format('/var/log/journal/remote'))
++                                 mkdir_p.format(journal_remote_logdir))
+         meson.add_install_script('sh', '-c',
+-                                 'chown 0:0 $DESTDIR/var/log/journal/remote &&
+-                                 chmod 755 $DESTDIR/var/log/journal/remote || :')
++                                 'chown 0:0 @0@ && chmod 755 @0@ || :'.format(journal_remote_logdir))
+ endif
+diff --git a/src/journal/meson.build b/src/journal/meson.build
+index da42fd89d..34018c80f 100644
+--- a/src/journal/meson.build
++++ b/src/journal/meson.build
+@@ -104,21 +104,22 @@ endif
+ 
+ install_data('journald.conf',
+              install_dir : pkgsysconfdir)
++journal_logdir = join_paths(rootprefixdir, '/var/log/journal')
+ 
+ meson.add_install_script(
+         'sh', '-c',
+-        mkdir_p.format('/var/log/journal'))
++        mkdir_p.format(journal_logdir))
+ meson.add_install_script(
+         'sh', '-c',
+-        'chown 0:0 $DESTDIR/var/log/journal &&
+-         chmod 755 $DESTDIR/var/log/journal || :')
++        'chown 0:0 @0@ &&
++         chmod 755 @0@ || :'.format(journal_logdir))
+ if get_option('adm-group')
+         meson.add_install_script(
+                 'sh', '-c',
+-                'setfacl -nm g:adm:rx,d:g:adm:rx $DESTDIR/var/log/journal || :')
++                'setfacl -nm g:adm:rx,d:g:adm:rx @0@ || :'.format(journal_logdir))
+ endif
+ if get_option('wheel-group')
+         meson.add_install_script(
+                 'sh', '-c',
+-                'setfacl -nm g:wheel:rx,d:g:wheel:rx $DESTDIR/var/log/journal || :')
++                'setfacl -nm g:wheel:rx,d:g:wheel:rx @0@ || :'.format(journal_logdir))
+ endif
