@@ -18095,6 +18095,8 @@ in {
 
   stevedore = callPackage ../development/python-modules/stevedore {};
 
+  tenjin = callPackage ../development/python-modules/tenjin { };
+
   Theano = callPackage ../development/python-modules/Theano rec {
     cudaSupport = pkgs.config.cudaSupport or false;
     cudnnSupport = cudaSupport;
