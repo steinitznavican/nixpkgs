@@ -763,6 +763,9 @@ with pkgs;
 
   bmon = callPackage ../tools/misc/bmon { };
 
+  bmv2 = callPackage ../applications/networking/p4lang/bmv2.nix { };
+
+
   bochs = callPackage ../applications/virtualization/bochs { };
 
   bubblewrap = callPackage ../tools/admin/bubblewrap { };
