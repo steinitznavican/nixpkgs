@@ -1,0 +1,24 @@
+From 35568ecb5898378aa70f04261164602a84b69b26 Mon Sep 17 00:00:00 2001
+From: Florian Klink <flokli@flokli.de>
+Date: Wed, 29 Nov 2017 04:40:24 +0100
+Subject: [PATCH] setup.py: use py.test
+
+---
+ setup.py | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/setup.py b/setup.py
+index 1013998..d62ce38 100755
+--- a/setup.py
++++ b/setup.py
+@@ -29,6 +29,7 @@ setup(
+     name = 'p4_hlir',
+     version = '0.9.58',
+     install_requires=['ply < 3.10'],
++    tests_require=['pytest'],
+     packages=['p4_hlir','p4_hlir/hlir', 'p4_hlir/frontend',
+               'p4_hlir/util', 'p4_hlir/graphs'],
+     package_data = {
+-- 
+2.15.0
+

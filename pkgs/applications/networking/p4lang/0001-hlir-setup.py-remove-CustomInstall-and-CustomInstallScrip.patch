@@ -1,0 +1,83 @@
+From 89e5d9b72d9b833789075fbf39744b9ecde837aa Mon Sep 17 00:00:00 2001
+From: Florian Klink <flokli@flokli.de>
+Date: Wed, 29 Nov 2017 04:38:47 +0100
+Subject: [PATCH 1/2] setup.py: remove CustomInstall and CustomInstallScripts
+
+---
+ setup.py | 55 +------------------------------------------------------
+ 1 file changed, 1 insertion(+), 54 deletions(-)
+
+diff --git a/setup.py b/setup.py
+index b52be52..1013998 100755
+--- a/setup.py
++++ b/setup.py
+@@ -25,57 +25,6 @@ SETUP_PY_PATH = os.path.dirname(__file__)
+ 
+ scripts = ['p4-validate', 'p4-graphs', 'p4-shell']
+ 
+-install_lib = None
+-old_install = None
+-
+-class CustomInstall(install):
+-    def run(self):
+-        # in this step we simply retrieve the installation path that we need to
+-        # append to the PYTHONPATH dynamically
+-        global install_lib
+-        global old_install
+-        assert(install_lib is None)
+-        # we use the platform-dependent install path computed by setuptools
+-        install_lib = os.path.abspath(self.install_lib)
+-        # if a root was specified we remove it from the install path
+-        if self.root is not None:
+-            assert(install_lib.startswith(self.root))
+-            install_lib = install_lib[len(self.root):]
+-        old_install = (self.old_and_unmanageable or self.single_version_externally_managed)
+-        # using install.run(self) causes setuptools to ignore install_requires
+-        # for a complete explanation, refer to
+-        # https://stackoverflow.com/questions/21915469/python-setuptools-install-requires-is-ignored-when-overriding-cmdclass
+-        # install.run(self)
+-        if old_install:
+-            install.run(self)
+-        else:
+-            install.do_egg_install(self)
+-
+-class CustomInstallScripts(install_scripts):
+-    def run(self):
+-        # in this second step we edit the scripts in place in the build
+-        # directory to add install_lib to the PYTHONPATH; the modified scripts
+-        # will be copied to the installation directory by setuptools
+-        assert(install_lib is not None)
+-
+-        def process_one(path):
+-            with open(path, "r") as fin:
+-                # add the directory to the PYHTONPATH before the first import
+-                p = re.compile('(^(?!#).*import.*)', re.MULTILINE)
+-                text = fin.read()
+-                new_text = p.sub(r'import sys\n'
+-                                 'sys.path.append("{}")\n'
+-                                 '\g<1>'.format(install_lib),
+-                                 text, count=1)
+-            with open(path, "w") as fout:
+-                fout.write(new_text)
+-
+-        if old_install:
+-            for s in scripts:
+-                process_one(os.path.join(self.build_dir, s))
+-
+-        install_scripts.run(self)
+-
+ setup(
+     name = 'p4_hlir',
+     version = '0.9.58',
+@@ -90,7 +39,5 @@ setup(
+     author_email = 'antonin@barefootnetworks.com',
+     description = 'p4_hlir: frontend for the P4 compiler',
+     license = '',
+-    url = 'http://www.barefootnetworks.com/',
+-    cmdclass={'install': CustomInstall,
+-              'install_scripts': CustomInstallScripts},
++    url = 'http://www.barefootnetworks.com/'
+ )
+-- 
+2.15.0
+

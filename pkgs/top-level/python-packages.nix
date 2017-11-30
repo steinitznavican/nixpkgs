@@ -6405,6 +6405,8 @@ in {
   odfpy = callPackage ../development/python-modules/odfpy { };
 
 
+  p4-hlir = callPackage ../applications/networking/p4lang/p4-hlir.nix { };
+
   pamela = buildPythonPackage rec {
     name = "pamela-${version}";
     version = "0.3.0";
