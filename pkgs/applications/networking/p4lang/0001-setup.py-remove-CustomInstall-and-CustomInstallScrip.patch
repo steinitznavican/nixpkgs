@@ -1,0 +1,69 @@
+From 5d773d84aa845844ec1fd5e0d37d1db604515abf Mon Sep 17 00:00:00 2001
+From: Florian Klink <flokli@flokli.de>
+Date: Wed, 29 Nov 2017 04:08:42 +0100
+Subject: [PATCH] setup.py: remove CustomInstall and CustomInstallScripts
+
+---
+ setup.py | 38 +-------------------------------------
+ 1 file changed, 1 insertion(+), 37 deletions(-)
+
+diff --git a/setup.py b/setup.py
+index f92dd14..a34359c 100755
+--- a/setup.py
++++ b/setup.py
+@@ -45,43 +45,9 @@ with open(os.path.join(SRC_PATH, "_version_str.py"), 'w') as version_f:
+ 
+ requirements = [
+     # TODO: put package requirements here
+-    'p4-hlir',
+     'Tenjin'
+ ]
+ 
+-install_lib = None
+-
+-class CustomInstall(install):
+-    def run(self):
+-        # in this step we simply retrieve the installation path that we need to
+-        # append to the PYTHONPATH dynamically
+-        global install_lib
+-        assert(install_lib is None)
+-        install_lib = os.path.abspath(self.install_lib)
+-        # if a root was specified we remove it from the install path
+-        if self.root is not None:
+-            assert(install_lib.startswith(self.root))
+-            install_lib = install_lib[len(self.root):]
+-        install.run(self)
+-
+-class CustomInstallScripts(install_scripts):
+-    def run(self):
+-        # in this second step we edit the script in the build directory to
+-        # replace @pythondir@ with the value of install_lib and we rename the
+-        # script; the modified script will be copied to the installation
+-        # directory by setuptools
+-        assert(install_lib is not None)
+-        in_path = os.path.join(self.build_dir, 'p4c-bmv2.in')
+-        out_path = os.path.join(self.build_dir, 'p4c-bmv2')
+-        with open(in_path, "r") as fin:
+-            with open(out_path, "w") as fout:
+-                for line in fin:
+-                    # we use the platform-dependent install path computed by
+-                    # setuptools
+-                    fout.write(line.replace('@pythondir@', install_lib))
+-        os.remove(os.path.join(self.build_dir, 'p4c-bmv2.in'))
+-        install_scripts.run(self)
+-
+ setup(
+     name='p4c_bm',
+     version=p4c_bm.__version__,
+@@ -115,7 +81,5 @@ setup(
+         "Programming Language :: Python :: 2",
+         'Programming Language :: Python :: 2.7',
+     ],
+-    test_suite='tests',
+-    cmdclass={'install': CustomInstall,
+-              'install_scripts': CustomInstallScripts},
++    test_suite='tests'
+ )
+-- 
+2.15.0
+

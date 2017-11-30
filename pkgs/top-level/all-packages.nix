@@ -4082,6 +4082,8 @@ with pkgs;
 
   cntlm = callPackage ../tools/networking/cntlm { };
 
+  p4c-bm = callPackage ../applications/networking/p4lang/p4c-bm.nix { };
+
   pastebinit = callPackage ../tools/misc/pastebinit { };
 
   polygraph = callPackage ../tools/networking/polygraph { };
