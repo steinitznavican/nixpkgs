@@ -755,6 +755,8 @@ with pkgs;
 
   tensor = libsForQt5.callPackage ../applications/networking/instant-messengers/tensor { };
 
+  blackbird_bitcoin_arbitrage = callPackage ../applications/misc/blackbird-bitcoin-arbitrage { };
+
   blink1-tool = callPackage ../tools/misc/blink1-tool { };
 
   blitz = callPackage ../development/libraries/blitz {
