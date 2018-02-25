@@ -2,6 +2,7 @@
 , gnome3, gtk_doc, acl, systemd, glib, libatasmart, polkit, coreutils, bash
 , expat, libxslt, docbook_xsl, utillinux, mdadm, libgudev, libblockdev, parted
 , gobjectIntrospection, docbook_xml_dtd_43
+, libxfs, f2fs-tools, e2fsprogs, btrfs-progs, exfat, nilfs-utils, udftools, ntfs3g, makeWrapper
 }:
 
 let
@@ -21,21 +22,20 @@ in stdenv.mkDerivation rec {
   patches = [
     (substituteAll {
       src = ./fix-paths.patch;
-      parted = "${parted}/bin/parted";
-      mdadm = "${mdadm}/bin/mdadm";
-      blkid = "${utillinux}/bin/blkid";
-      sh = "${bash}/bin/sh";
       bash = "${bash}/bin/bash";
-      sed = "${gnused}/bin/sed";
-      true = "${coreutils}/bin/true";
-      sleep = "${coreutils}/bin/sleep";
+      blkid = "${utillinux}/bin/blkid";
       false = "${coreutils}/bin/false";
+      mdadm = "${mdadm}/bin/mdadm";
+      sed = "${gnused}/bin/sed";
+      sh = "${bash}/bin/sh";
+      sleep = "${coreutils}/bin/sleep";
+      true = "${coreutils}/bin/true";
     })
   ];
 
   nativeBuildInputs = [
     pkgconfig gnome3.gnome_common libtool intltool gobjectIntrospection
-    gtk_doc libxslt docbook_xml_dtd_43 docbook_xsl
+    gtk_doc libxslt docbook_xml_dtd_43 docbook_xsl makeWrapper
   ];
 
   buildInputs = [
@@ -55,6 +55,10 @@ in stdenv.mkDerivation rec {
     "INTROSPECTION_GIRDIR=$(dev)/share/gir-1.0"
     "INTROSPECTION_TYPELIBDIR=$(out)/lib/girepository-1.0"
   ];
+
+  preFixup = ''
+    wrapProgram $out/libexec/udisks2/udisksd --prefix PATH : ${stdenv.lib.makeBinPath [ btrfs-progs coreutils e2fsprogs exfat f2fs-tools nilfs-utils libxfs ntfs3g parted utillinux ]}
+  '';
 
   meta = with stdenv.lib; {
     description = "A daemon, tools and libraries to access and manipulate disks, storage devices and technologies";
