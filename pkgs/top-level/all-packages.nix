@@ -9757,6 +9757,8 @@ with pkgs;
 
   libburn = callPackage ../development/libraries/libburn { };
 
+  libbytesize = callPackage ../development/libraries/libbytesize { };
+
   libcaca = callPackage ../development/libraries/libcaca {
     inherit (xorg) libX11 libXext;
   };
