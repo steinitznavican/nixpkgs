@@ -1,0 +1,25 @@
+From 2a01c40ccb1a1aefefc710797fee9a774a3c5d8b Mon Sep 17 00:00:00 2001
+From: Kubo Takehiro <kubo@jiubao.org>
+Date: Fri, 8 Jun 2018 21:07:38 +0200
+Subject: [PATCH] Makefile: fix dylib names
+
+Tested-by: Florian Klink <flokli@flokli.de>
+---
+ Makefile | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Makefile b/Makefile
+index 7e18a23..5ff1838 100644
+--- a/Makefile
++++ b/Makefile
+@@ -117,6 +117,7 @@ $(INSTALL_INC_DIR)/%.h: %.h
+ 
+ $(INSTALL_LIB_DIR)/$(FULL_LIB_NAME): $(LIB_DIR)/$(LIB_NAME)
+ 	$(INSTALL) $< $@
++	if test "`uname -s`" = Darwin; then install_name_tool -id $(INSTALL_LIB_DIR)/$(VERSION_LIB_NAME) $@; fi
+ 
+ $(INSTALL_LIB_DIR)/$(VERSION_LIB_NAME): $(INSTALL_LIB_DIR)/$(FULL_LIB_NAME)
+ 	ln -sf $(FULL_LIB_NAME) $@
+-- 
+2.17.1
+
