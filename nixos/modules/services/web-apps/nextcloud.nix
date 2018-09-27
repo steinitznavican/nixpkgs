@@ -150,6 +150,11 @@ in {
         default = "localhost";
         description = "Database host.";
       };
+      dbport = mkOption {
+        type = with types; nullOr (either int str);
+        default = null;
+        description = "Database port.";
+      };
       dbtableprefix = mkOption {
         type = types.nullOr types.str;
         default = null;
@@ -268,6 +273,7 @@ in {
               # will be omitted.
               ${if c.dbname != null then "--database-name" else null} = ''"${c.dbname}"'';
               ${if c.dbhost != null then "--database-host" else null} = ''"${c.dbhost}"'';
+              ${if c.dbport != null then "--database-port" else null} = ''"${toString c.dbport}"'';
               ${if c.dbuser != null then "--database-user" else null} = ''"${c.dbuser}"'';
               ${if (any (x: x != null) [c.dbpass c.dbpassFile])
                  then "--database-pass" else null} = dbpass;
