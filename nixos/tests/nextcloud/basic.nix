@@ -1,20 +1,17 @@
-import ./make-test.nix ({ pkgs, ...} : {
-  name = "nextcloud";
+import ../make-test.nix ({ pkgs, ...} : {
+  name = "nextcloud-basic";
   meta = with pkgs.stdenv.lib.maintainers; {
-    maintainers = [ globin ];
+    maintainers = [ globin eqyiel ];
   };
 
   nodes = {
     nextcloud = { config, pkgs, ... }: {
-      #virtualisation.memorySize = 768;
       services.nextcloud = {
         enable = true;
         nginx.enable = true;
         hostName = "nextcloud";
         config.adminpass = "notproduction";
       };
-
-      networking.firewall.enable = false;
     };
   };
 
