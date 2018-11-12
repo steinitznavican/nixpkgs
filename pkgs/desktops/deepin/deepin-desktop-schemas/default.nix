@@ -1,6 +1,5 @@
-{ stdenv, fetchFromGitHub, python, deepin-gtk-theme,
-  deepin-icon-theme, deepin-sound-theme, deepin-wallpapers, gnome3,
-  deepin }:
+{ stdenv, fetchFromGitHub, python, gnome3, deepin-gtk-theme,
+  deepin-icon-theme, deepin-sound-theme, deepin-wallpapers, deepin }:
 
 stdenv.mkDerivation rec {
   name = "${pname}-${version}";
@@ -16,6 +15,7 @@ stdenv.mkDerivation rec {
 
   nativeBuildInputs = [
     python
+    gnome3.glib.dev
   ];
 
   buildInputs = [
@@ -27,12 +27,37 @@ stdenv.mkDerivation rec {
   ];
 
   postPatch = ''
+    # debugging
+    echo -------------; grep --color=always -a -r -E '/(usr|bin|etc|var|lib|opt)' || true
+    echo -------------
+
     # fix default background url
-    sed -i '/picture-uri/s|/usr/share/backgrounds/default_background.jpg|$out/share/backgrounds/deepin/default.png|' \
+    sed -i -e 's,/usr/share/backgrounds/default_background.jpg,${deepin-wallpapers}/share/backgrounds/deepin/desktop.jpg,' \
       overrides/common/com.deepin.wrap.gnome.desktop.override
+
+    sed -i -e 's,/usr/share/wallpapers/deepin,${deepin-wallpapers}/share/wallpapers/deepin,g' \
+      schemas/com.deepin.dde.appearance.gschema.xml
+
+    # still hardcoded paths:
+    #   /etc/gnome-settings-daemon/xrandr/monitors.xml                                ? gnome3.gnome-settings-daemon
+    #   /usr/share/backgrounds/gnome/adwaita-lock.jpg                                 ? gnome3.gnome-backgrounds
+    #   /usr/share/backgrounds/gnome/adwaita-timed.xml                                gnome3.gnome-backgrounds
   '';
 
   makeFlags = [ "PREFIX=$(out)" ];
+
+  doCheck = true;
+  checkTarget = "test";
+
+  postInstall = ''
+    glib-compile-schemas --strict $out/share/glib-2.0/schemas
+  '';
+
+  postFixup = ''
+    # debugging
+    echo -------------; grep --color=always -a -r -E '/(usr|bin|etc|var|lib|opt)' $out || true
+    echo ------------- 
+  '';
 
   passthru.updateScript = deepin.updateScript { inherit name; };
 
