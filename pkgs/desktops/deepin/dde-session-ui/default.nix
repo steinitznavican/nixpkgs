@@ -1,7 +1,7 @@
 { stdenv, fetchFromGitHub, pkgconfig, qmake, qtsvg, qttools,
   qtx11extras, xkeyboard_config, xorg, lightdm_qt, gsettings-qt,
   dde-qt-dbus-factory, deepin-gettext-tools, dtkcore, dtkwidget,
-  hicolor-icon-theme, deepin }:
+  deepin-desktop-schemas, deepin, hicolor-icon-theme, wrapGAppsHook }:
 
 stdenv.mkDerivation rec {
   name = "${pname}-${version}";
@@ -20,6 +20,7 @@ stdenv.mkDerivation rec {
     qmake
     qttools
     deepin-gettext-tools
+    wrapGAppsHook
   ];
 
   buildInputs = [
@@ -35,6 +36,7 @@ stdenv.mkDerivation rec {
     xorg.libXtst
     xkeyboard_config
     hicolor-icon-theme
+    deepin-desktop-schemas
   ];
 
   postPatch = ''
