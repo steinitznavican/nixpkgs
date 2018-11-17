@@ -6,7 +6,6 @@
 , xorriso, makeself, perl
 , javaBindings ? false, jdk ? null
 , pythonBindings ? false, python2 ? null
-, extensionPack ? null, fakeroot ? null
 , pulseSupport ? false, libpulseaudio ? null
 , enableHardening ? false
 , headless ? false
@@ -153,18 +152,6 @@ in stdenv.mkDerivation {
         ln -s "$libexec/$file" $out/bin/$file
     done
 
-    ${optionalString (extensionPack != null) ''
-      mkdir -p "$share"
-      "${fakeroot}/bin/fakeroot" "${stdenv.shell}" <<EXTHELPER
-      "$libexec/VBoxExtPackHelperApp" install \
-        --base-dir "$share/ExtensionPacks" \
-        --cert-dir "$share/ExtPackCertificates" \
-        --name "Oracle VM VirtualBox Extension Pack" \
-        --tarball "${extensionPack}" \
-        --sha-256 "${extensionPack.outputHash}"
-      EXTHELPER
-    ''}
-
     ${optionalString (!headless) ''
       # Create and fix desktop item
       mkdir -p $out/share/applications
@@ -183,7 +170,6 @@ in stdenv.mkDerivation {
 
   passthru = {
     inherit version;       # for guest additions
-    inherit extensionPack; # for inclusion in profile to prevent gc
   };
 
   meta = {
