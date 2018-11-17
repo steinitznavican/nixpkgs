@@ -78,7 +78,8 @@ in stdenv.mkDerivation {
       name = "010-qt-5.11.patch";
       url = "https://git.archlinux.org/svntogit/community.git/plain/trunk/010-qt-5.11.patch?h=packages/virtualbox";
       sha256 = "0hjx99pg40wqyggnrpylrp5zngva4xrnk7r90i0ynrqc7n84g9pn";
-    })
+})
+    ./0001-ExtPackManagerImpl-read-vboxExtpackDir-from-VBOX_EXT.patch
   ];
 
   postPatch = ''
