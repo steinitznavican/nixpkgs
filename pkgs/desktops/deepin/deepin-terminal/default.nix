@@ -7,13 +7,13 @@
 stdenv.mkDerivation rec {
   name = "${pname}-${version}";
   pname = "deepin-terminal";
-  version = "3.0.10.2";
+  version = "3.0.12";
 
   src = fetchFromGitHub {
     owner = "linuxdeepin";
     repo = "deepin-terminal";
     rev = version;
-    sha256 = "0ylhp8q9kfdq9l69drawjaf0q8vcqyflb2a3zfnwbnf06dlpvkz6";
+    sha256 = "12f6vkdhc9q9325qm4jh3wga88mf39g21s88dlp5zggk3bzr9p9k";
   };
 
   nativeBuildInputs = [
@@ -51,6 +51,8 @@ stdenv.mkDerivation rec {
   postPatch = ''
     patchShebangs .
   '';
+
+  cmakeFlags = [ "-DUSE_VENDOR_LIB=OFF" ];
 
   enableParallelBuilding = true;
 
