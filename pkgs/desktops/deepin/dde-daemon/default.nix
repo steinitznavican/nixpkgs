@@ -7,7 +7,7 @@
 buildGoPackage rec {
   name = "${pname}-${version}";
   pname = "dde-daemon";
-  version = "3.6.0";
+  version = "3.14.0";
 
   goPackagePath = "pkg.deepin.io/dde/daemon";
 
@@ -15,15 +15,14 @@ buildGoPackage rec {
     owner = "linuxdeepin";
     repo = pname;
     rev = version;
-    sha256 = "0gn2zp34wg79lvzdfla6yb4gs3f9ll83kj765zvig1wpx51nq1aj";
+    sha256 = "1irzpficqij3p424lfhazp7ajjim93hrbwjq9b6zhfa47dyv60h7";
   };
 
   patches = [
     # https://github.com/linuxdeepin/dde-daemon/issues/51
     (fetchpatch {
-      name = "dde-daemon_3.2.3.patch";
-      url = https://github.com/jouyouyun/tap-gesture-patches/raw/master/patches/dde-daemon_3.2.3.patch;
-      sha256 = "0a3xb15czpfl2vajpf7ycw37vr7fbw2png1a67mvjjkgx7d1k7dg";
+      url = https://github.com/jouyouyun/tap-gesture-patches/raw/master/patches/dde-daemon_3.8.0.patch;
+      sha256 = "1ampdsp9zlg263flswdw9gj10n7gxh7zi6w6z9jgh29xlai05pvh";
     })
   ];
 
