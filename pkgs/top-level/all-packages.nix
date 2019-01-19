@@ -5520,6 +5520,8 @@ in
 
   snort = callPackage ../applications/networking/ids/snort { };
 
+  spacenavd = callPackage ../tools/misc/spacenavd { };
+
   soapui = callPackage ../applications/networking/soapui { };
 
   sshguard = callPackage ../tools/security/sshguard {};
