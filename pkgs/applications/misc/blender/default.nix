@@ -2,7 +2,7 @@
 , ilmbase, libXi, libX11, libXext, libXrender
 , libjpeg, libpng, libsamplerate, libsndfile
 , libtiff, libGLU_combined, openal, opencolorio, openexr, openimageio, openjpeg_1, pythonPackages
-, zlib, fftw, opensubdiv, freetype, jemalloc, ocl-icd
+, zlib, fftw, opensubdiv, freetype, jemalloc, ocl-icd, libspnav
 , jackaudioSupport ? false, libjack2
 , cudaSupport ? false, cudatoolkit
 , colladaSupport ? true, opencollada
@@ -51,6 +51,7 @@ stdenv.mkDerivation rec {
       "-DWITH_SYSTEM_OPENJPEG=ON"
       "-DWITH_PLAYER=ON"
       "-DWITH_OPENSUBDIV=ON"
+      "-DSPACENAV_ROOT_DIR=${libspnav}/"
       "-DPYTHON_LIBRARY=${python.libPrefix}m"
       "-DPYTHON_LIBPATH=${python}/lib"
       "-DPYTHON_INCLUDE_DIR=${python}/include/${python.libPrefix}m"
