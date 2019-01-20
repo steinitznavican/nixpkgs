@@ -50,6 +50,7 @@
   ./hardware/opengl.nix
   ./hardware/pcmcia.nix
   ./hardware/raid/hpsa.nix
+  ./hardware/spacenavd.nix
   ./hardware/steam-hardware.nix
   ./hardware/usb-wwan.nix
   ./hardware/onlykey.nix

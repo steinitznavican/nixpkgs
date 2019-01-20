@@ -51,6 +51,13 @@
      the imperative and broken <literal>google-accounts-daemon</literal> used
      in <literal>nixos/modules/virtualisation/google-compute-config.nix</literal>.
     </para>
+    </listitem>
+    <listitem>
+     <para>
+      There is a new <varname>hardware.spacenavd</varname> module to enable
+      spacenavd, a user-space driver for 6-dof input devices, like
+      3Dconnexion's space-mice.
+     </para>
    </listitem>
   </itemizedlist>
  </section>
