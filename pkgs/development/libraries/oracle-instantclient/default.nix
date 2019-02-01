@@ -1,18 +1,20 @@
-{ stdenv, requireFile, autoPatchelfHook, fixDarwinDylibNames, unzip, libaio, makeWrapper, odbcSupport ? false, unixODBC }:
+{ stdenv, fetchurl, autoPatchelfHook, fixDarwinDylibNames, unzip, libaio, makeWrapper, odbcSupport ? false, unixODBC }:
 
 assert odbcSupport -> unixODBC != null;
 
 let
   inherit (stdenv.lib) optional optionals optionalString;
 
-  baseVersion = "12.2";
-  version = "${baseVersion}.0.1.0";
+  version = "12.2.0.1.0";
 
-  requireSource = component: arch: version: rel: hash: (requireFile rec {
-    name = "instantclient-${component}-${arch}-${version}" + (optionalString (rel != "") "-${rel}") + ".zip";
-    url = "http://www.oracle.com/technetwork/database/database-technologies/instant-client/downloads/index.html";
+  fetchFromOtn = component: arch: version: rel: hash:
+  let
+    versionWithoutDots = stdenv.lib.replaceStrings ["."] [""] version;
+  in fetchurl {
+    url = "https://download.oracle.com/otn/linux/instantclient/${versionWithoutDots}/instantclient-${component}-${arch}-${version}" + (optionalString (rel != "") "-${rel}") + ".zip";
     sha256 = hash;
-  });
+    curlOpts = "-b oraclelicense=a";
+  };
 
   throwSystem = throw "Unsupported system: ${stdenv.hostPlatform.system}";
 
@@ -23,15 +25,15 @@ let
 
   srcs = {
     "x86_64-linux" = [
-      (requireSource "basic" arch version "" "5015e3c9fba84e009f7519893f798a1622c37d1ae2c55104ff502c52a0fe5194")
-      (requireSource "sdk" arch version "" "7f404c3573c062ce487a51ac4cfe650c878d7edf8e73b364ec852645ed1098cb")
-      (requireSource "sqlplus" arch version "" "d49b2bd97376591ca07e7a836278933c3f251875c215044feac73ba9f451dfc2") ]
-      ++ optional odbcSupport (requireSource "odbc" arch version "2" "365a4ae32c7062d9fbc3fb41add748e7881f774484a175a4b41a2c294ce9095d");
+      (fetchFromOtn "basic" arch version "" "5015e3c9fba84e009f7519893f798a1622c37d1ae2c55104ff502c52a0fe5194")
+      (fetchFromOtn "sdk" arch version "" "7f404c3573c062ce487a51ac4cfe650c878d7edf8e73b364ec852645ed1098cb")
+      (fetchFromOtn "sqlplus" arch version "" "d49b2bd97376591ca07e7a836278933c3f251875c215044feac73ba9f451dfc2") ]
+      ++ optional odbcSupport (fetchFromOtn "odbc" arch version "2" "365a4ae32c7062d9fbc3fb41add748e7881f774484a175a4b41a2c294ce9095d");
     "x86_64-darwin" = [
-      (requireSource "basic" arch version "2" "3ed3102e5a24f0da638694191edb34933309fb472eb1df21ad5c86eedac3ebb9")
-      (requireSource "sdk" arch version "2" "e0befca9c4e71ebc9f444957ffa70f01aeeec5976ea27c40406471b04c34848b")
-      (requireSource "sqlplus" arch version "2" "d147cbb5b2a954fdcb4b642df4f0bd1153fd56e0f56e7fa301601b4f7e2abe0e") ]
-      ++ optional odbcSupport (requireSource "odbc" arch version "2" "1805c1ab6c8c5e8df7bdcc35d7f2b94c329ecf4dff9bde55d5f9b159ecd8b64e");
+      (fetchFromOtn "basic" arch version "2" "3ed3102e5a24f0da638694191edb34933309fb472eb1df21ad5c86eedac3ebb9")
+      (fetchFromOtn "sdk" arch version "2" "e0befca9c4e71ebc9f444957ffa70f01aeeec5976ea27c40406471b04c34848b")
+      (fetchFromOtn "sqlplus" arch version "2" "d147cbb5b2a954fdcb4b642df4f0bd1153fd56e0f56e7fa301601b4f7e2abe0e") ]
+      ++ optional odbcSupport (fetchFromOtn"odbc" arch version "2" "1805c1ab6c8c5e8df7bdcc35d7f2b94c329ecf4dff9bde55d5f9b159ecd8b64e");
   }."${stdenv.hostPlatform.system}" or throwSystem;
 
   extLib = stdenv.hostPlatform.extensions.sharedLibrary;
