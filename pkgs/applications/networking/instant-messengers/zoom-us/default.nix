@@ -16,8 +16,8 @@ let
   version = "2.6.146750.1204";
   srcs = {
     x86_64-linux = fetchurl {
-      url = "https://zoom.us/client/${version}/zoom_x86_64.tar.xz";
-      sha256 = "18cpl1ggyw6nf9r85jqn0cq9j7qrhxfy6nah2qqs5bqj84dqhsrg";
+      url = "https://ota.zoom.us/Linux/64bit/zoom_withlog_latest_x86_64.tar.xz";
+      sha256 = "023dyp14k7bd1jy4r9h9wi9f0fx6g1bsl301ljmf272mp4zn3y4w";
     };
   };
 
@@ -49,7 +49,6 @@ in stdenv.mkDerivation {
       files = concatStringsSep " " [
         "*.pcm"
         "*.png"
-        "ZXMPPROOT.cer"
         "ZoomLauncher"
         "config-dump.sh"
         "timezones"
