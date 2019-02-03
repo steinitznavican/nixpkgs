@@ -76,6 +76,7 @@ in stdenv.mkDerivation rec {
   '';
 
   meta = with stdenv.lib; {
+    homepage = http://www.oracle.com/technetwork/database/database-technologies/instant-client/downloads/index.html;
     description = "Oracle instant client libraries and sqlplus CLI";
     longDescription = ''
       Oracle instant client provides access to Oracle databases (OCI,
