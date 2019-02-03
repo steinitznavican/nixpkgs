@@ -1,6 +1,13 @@
-{ stdenv, requireFile, autoPatchelfHook, fixDarwinDylibNames, unzip, libaio, makeWrapper, odbcSupport ? false, unixODBC }:
+{ stdenv, requireFile, autoPatchelfHook, fixDarwinDylibNames, unzip, libaio, makeWrapper, odbcSupport ? false, unixODBC, licenseAccepted ? false }:
 
 assert odbcSupport -> unixODBC != null;
+
+if !licenseAccepted then throw ''
+  You must accept the Oracle Technology Network License Agreement at
+  https://www.oracle.com/technetwork/licenses/distribution-license-152002.html
+  by setting nixpkgs config option 'otn.accept_license = true;'
+  ''
+else assert licenseAccepted;
 
 let
   inherit (stdenv.lib) optional optionals optionalString;

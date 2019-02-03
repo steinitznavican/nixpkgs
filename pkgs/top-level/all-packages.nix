@@ -730,7 +730,9 @@ in
 
   passff-host = callPackage ../tools/security/passff-host { };
 
-  oracle-instantclient = callPackage ../development/libraries/oracle-instantclient { };
+  oracle-instantclient = callPackage ../development/libraries/oracle-instantclient {
+    licenseAccepted = config.otn.accept_license or false;
+  };
 
   goku = callPackage ../os-specific/darwin/goku { };
 
