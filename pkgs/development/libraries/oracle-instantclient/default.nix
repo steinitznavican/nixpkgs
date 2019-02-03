@@ -1,4 +1,4 @@
-{ stdenv, requireFile, autoPatchelfHook, fixDarwinDylibNames, unzip, libaio, makeWrapper, odbcSupport ? false, unixODBC, licenseAccepted ? false }:
+{ stdenv, fetchurl, requireFile, autoPatchelfHook, fixDarwinDylibNames, unzip, rpmextract, libaio, makeWrapper, odbcSupport ? false, unixODBC, licenseAccepted ? false }:
 
 assert odbcSupport -> unixODBC != null;
 
@@ -12,15 +12,25 @@ else assert licenseAccepted;
 let
   inherit (stdenv.lib) optional optionals optionalString;
 
-  baseVersion = "12.2";
-  version = "${baseVersion}.0.1.0";
+  baseVersion = "18.3";
+  version = "${baseVersion}.0.0.0";
+  rel = "3";
 
-  requireSource = component: arch: version: rel: hash: (requireFile rec {
-    name = "instantclient-${component}-${arch}-${version}" + (optionalString (rel != "") "-${rel}") + ".zip";
-    url = "http://www.oracle.com/technetwork/database/database-technologies/instant-client/downloads/index.html";
-    sha256 = hash;
-  });
-
+  fetchOracle = component: arch: version: rel: hash:
+  if arch == "linux.x64" then
+    let
+      component' = if component == "sdk" then "devel" else component;
+    in
+    # fetch the click-through rpm
+    (fetchurl {
+      url = "http://yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/x86_64/getPackage/" +
+      "oracle-instantclient${baseVersion}-${component'}-${version}" + (optionalString (rel != "") "-${rel}") + ".x86_64.rpm";
+      sha256 = hash;
+    }) else (requireFile rec {
+      name = "instantclient-${component}-${arch}-${version}" + (optionalString (rel != "") "-${rel}") + ".zip";
+      url = "http://www.oracle.com/technetwork/database/database-technologies/instant-client/downloads/index.html";
+      sha256 = hash;
+    });
   throwSystem = throw "Unsupported system: ${stdenv.hostPlatform.system}";
 
   arch = {
@@ -30,15 +40,15 @@ let
 
   srcs = {
     "x86_64-linux" = [
-      (requireSource "basic" arch version "" "5015e3c9fba84e009f7519893f798a1622c37d1ae2c55104ff502c52a0fe5194")
-      (requireSource "sdk" arch version "" "7f404c3573c062ce487a51ac4cfe650c878d7edf8e73b364ec852645ed1098cb")
-      (requireSource "sqlplus" arch version "" "d49b2bd97376591ca07e7a836278933c3f251875c215044feac73ba9f451dfc2") ]
-      ++ optional odbcSupport (requireSource "odbc" arch version "2" "365a4ae32c7062d9fbc3fb41add748e7881f774484a175a4b41a2c294ce9095d");
+      (fetchOracle "basic" arch version rel "1d8ml0sjrpg6fg20yrrakr8v8g17xr20fbpwc3ai68aqkpalkfqd")
+      (fetchOracle "sdk" arch version rel "1z21kwnfxjyvgvcggm0bfl83hb5r9vzd9pqy8v6nryapx1yyhh6r")
+      (fetchOracle "sqlplus" arch version rel "0nih355ggs7c2gjnqjzzvc5pprz18rjwz1ryn8gq43p931ib54ja") ]
+      ++ optional odbcSupport (fetchOracle "odbc" arch version rel "1hd2ngqzbg2fvlxig8l04fzg0vbpfcl8bx9wfrgvc8dmir059mmx");
     "x86_64-darwin" = [
-      (requireSource "basic" arch version "2" "3ed3102e5a24f0da638694191edb34933309fb472eb1df21ad5c86eedac3ebb9")
-      (requireSource "sdk" arch version "2" "e0befca9c4e71ebc9f444957ffa70f01aeeec5976ea27c40406471b04c34848b")
-      (requireSource "sqlplus" arch version "2" "d147cbb5b2a954fdcb4b642df4f0bd1153fd56e0f56e7fa301601b4f7e2abe0e") ]
-      ++ optional odbcSupport (requireSource "odbc" arch version "2" "1805c1ab6c8c5e8df7bdcc35d7f2b94c329ecf4dff9bde55d5f9b159ecd8b64e");
+      (fetchOracle "basic" arch version rel "0000000000000000000000000000000000000000000000000000000000000000")
+      (fetchOracle "sdk" arch version rel "0000000000000000000000000000000000000000000000000000000000000000")
+      (fetchOracle "sqlplus" arch version rel "0000000000000000000000000000000000000000000000000000000000000000") ]
+      ++ optional odbcSupport (fetchOracle "odbc" arch version rel "0000000000000000000000000000000000000000000000000000000000000000");
   }."${stdenv.hostPlatform.system}" or throwSystem;
 
   extLib = stdenv.hostPlatform.extensions.sharedLibrary;
@@ -50,11 +60,34 @@ in stdenv.mkDerivation rec {
     ++ optionals (stdenv.isLinux) [ libaio ]
     ++ optional odbcSupport unixODBC;
 
-  nativeBuildInputs = [ makeWrapper unzip ]
+  nativeBuildInputs = [ makeWrapper ]
     ++ optional stdenv.isLinux autoPatchelfHook
     ++ optional stdenv.isDarwin fixDarwinDylibNames;
 
-  unpackCmd = "unzip $curSrc";
+    unpackCmd = if stdenv.hostPlatform.system == "x86_64-linux" then
+    # RPM files contain files inside /usr/*/oracle/${baseVersion},
+    # so massage it to match the zip layout
+    ''
+      ${rpmextract}/bin/rpmextract $curSrc
+      mkdir -p instantclient
+      for f in "usr/lib/oracle/${baseVersion}/client64/"{bin,lib}/* ; do
+        mv $f instantclient
+      done
+      for f in "usr/share/oracle/${baseVersion}/"{client64/,}"doc/"* ; do
+        mv $f instantclient
+      done
+
+      mkdir -p instantclient/sdk/{include,demo}
+      for f in "usr/include/oracle/${baseVersion}/client64/"* ; do
+        mv $f instantclient/sdk/include/
+      done
+      for f in "usr/share/oracle/${baseVersion}/client64/demo/"* ; do
+        mv $f instantclient/sdk/demo/
+      done
+
+      rm -R usr
+    ''
+    else "${unzip}/bin/unzip $curSrc";
 
   installPhase = ''
     mkdir -p "$out/"{bin,include,lib,"share/java","share/${name}/demo/"}
