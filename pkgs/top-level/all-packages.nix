@@ -1156,6 +1156,8 @@ in
 
   corebird = callPackage ../applications/networking/corebird { };
 
+  coreos-metadata = callPackage ../tools/virtualization/coreos-metadata { };
+
   corosync = callPackage ../servers/corosync { };
 
   cowsay = callPackage ../tools/misc/cowsay { };
