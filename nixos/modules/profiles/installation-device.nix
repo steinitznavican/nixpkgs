@@ -10,10 +10,6 @@ with lib;
       ../installer/scan/detected.nix
       ../installer/scan/not-detected.nix
 
-      # Allow "nixos-rebuild" to work properly by providing
-      # /etc/nixos/configuration.nix.
-      ./clone-config.nix
-
       # Include a copy of Nixpkgs so that nixos-install works out of
       # the box.
       ../installer/cd-dvd/channel.nix

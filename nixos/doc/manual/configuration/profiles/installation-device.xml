@@ -6,11 +6,8 @@
  <title>Installation Device</title>
 
  <para>
-  Provides a basic configuration for installation devices like CDs. This means
-  enabling hardware scans, using the <link linkend="sec-profile-clone-config">
-  Clone Config profile</link> to guarantee
-  <filename>/etc/nixos/configuration.nix</filename> exists (for
-  <command>nixos-rebuild</command> to work), a copy of the Nixpkgs channel
+  Provides a basic configuration for installation devices like CDs.
+  This means enabling hardware scans, and a copy of the Nixpkgs channel
   snapshot used to create the install media.
  </para>
 

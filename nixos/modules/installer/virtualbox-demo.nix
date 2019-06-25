@@ -7,7 +7,6 @@ with lib;
     [ ../virtualisation/virtualbox-image.nix
       ../installer/cd-dvd/channel.nix
       ../profiles/demo.nix
-      ../profiles/clone-config.nix
     ];
 
   # FIXME: UUID detection is currently broken
