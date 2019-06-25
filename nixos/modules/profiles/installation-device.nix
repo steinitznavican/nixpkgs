@@ -39,13 +39,13 @@ with lib;
     services.mingetty.autologinUser = "root";
 
     # Some more help text.
-    services.mingetty.helpLine =
-      ''
-
-        The "root" account has an empty password.  ${
-          optionalString config.services.xserver.enable
-            "Type `systemctl start display-manager' to\nstart the graphical user interface."}
-      '';
+    services.mingetty.helpLine = ''
+      The "root" account has an empty password.
+      sshd can be started manually via "systemctl start sshd"
+      - remember to set a password, or add to ~/.ssh/authorized_keys first.
+    '' + optionalString config.services.xserver.enable ''
+          Type `systemctl start display-manager' to\nstart the graphical user interface.
+    '';
 
     # Allow sshd to be started manually through "systemctl start sshd".
     services.openssh = {
